@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom/vitest'
+
 import { describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, waitFor } from '@testing-library/react'
 import * as React from 'react'
@@ -269,12 +271,14 @@ describe('useMutation', () => {
 
     function Page() {
       const { mutateAsync } = useMutation({
-        mutationFn: async (text: string) => text,
-        onSuccess: async () => {
+        mutationFn: (text: string) => Promise.resolve(text),
+        onSuccess: () => {
           callbacks.push('useMutation.onSuccess')
+          return Promise.resolve()
         },
-        onSettled: async () => {
+        onSettled: () => {
           callbacks.push('useMutation.onSettled')
+          return Promise.resolve()
         },
       })
 
@@ -282,11 +286,13 @@ describe('useMutation', () => {
         setActTimeout(async () => {
           try {
             const result = await mutateAsync('todo', {
-              onSuccess: async () => {
+              onSuccess: () => {
                 callbacks.push('mutateAsync.onSuccess')
+                return Promise.resolve()
               },
-              onSettled: async () => {
+              onSettled: () => {
                 callbacks.push('mutateAsync.onSettled')
+                return Promise.resolve()
               },
             })
             callbacks.push(`mutateAsync.result:${result}`)
@@ -316,11 +322,13 @@ describe('useMutation', () => {
     function Page() {
       const { mutateAsync } = useMutation({
         mutationFn: async (_text: string) => Promise.reject(new Error('oops')),
-        onError: async () => {
+        onError: () => {
           callbacks.push('useMutation.onError')
+          return Promise.resolve()
         },
-        onSettled: async () => {
+        onSettled: () => {
           callbacks.push('useMutation.onSettled')
+          return Promise.resolve()
         },
       })
 
@@ -328,11 +336,13 @@ describe('useMutation', () => {
         setActTimeout(async () => {
           try {
             await mutateAsync('todo', {
-              onError: async () => {
+              onError: () => {
                 callbacks.push('mutateAsync.onError')
+                return Promise.resolve()
               },
-              onSettled: async () => {
+              onSettled: () => {
                 callbacks.push('mutateAsync.onSettled')
+                return Promise.resolve()
               },
             })
           } catch (error) {
@@ -646,7 +656,7 @@ describe('useMutation', () => {
     onlineMock.mockRestore()
   })
 
-  it('should not change state if unmounted', async () => {
+  it('should not change state if unmounted', () => {
     function Mutates() {
       const { mutate } = useMutation({ mutationFn: () => sleep(10) })
       return <button onClick={() => mutate()}>mutate</button>
@@ -785,12 +795,12 @@ describe('useMutation', () => {
 
     function Page() {
       const { mutate: succeed, isSuccess } = useMutation({
-        mutationFn: async () => '',
+        mutationFn: () => Promise.resolve(''),
         meta: { metaSuccessMessage },
       })
       const { mutate: error, isError } = useMutation({
-        mutationFn: async () => {
-          throw new Error('')
+        mutationFn: () => {
+          return Promise.reject(new Error(''))
         },
         meta: { metaErrorMessage },
       })

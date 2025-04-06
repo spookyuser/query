@@ -1,12 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Query, QueryCache, hashKey } from '@tanstack/query-core'
+import { Query, QueryClient, hashKey } from '@tanstack/query-core'
 import {
   PERSISTER_KEY_PREFIX,
   experimental_createQueryPersister,
 } from '../createPersister'
 import { sleep } from './utils'
+import type { QueryFunctionContext, QueryKey } from '@tanstack/query-core'
 import type { StoragePersisterOptions } from '../createPersister'
-import type { QueryKey } from '@tanstack/query-core'
 
 function getFreshStorage() {
   const storage = new Map()
@@ -14,9 +14,11 @@ function getFreshStorage() {
     getItem: (key: string) => Promise.resolve(storage.get(key)),
     setItem: (key: string, value: unknown) => {
       storage.set(key, value)
+      return Promise.resolve()
     },
     removeItem: (key: string) => {
       storage.delete(key)
+      return Promise.resolve()
     },
   }
 }
@@ -25,12 +27,14 @@ function setupPersister(
   queryKey: QueryKey,
   persisterOptions: StoragePersisterOptions,
 ) {
+  const client = new QueryClient()
   const context = {
     meta: { foo: 'bar' },
+    client,
     queryKey,
     // @ts-expect-error
     signal: undefined as AbortSignal,
-  }
+  } satisfies QueryFunctionContext
   const queryHash = hashKey(queryKey)
   const storageKey = `${PERSISTER_KEY_PREFIX}-${queryHash}`
 
@@ -39,7 +43,7 @@ function setupPersister(
   const { persisterFn } = experimental_createQueryPersister(persisterOptions)
 
   const query = new Query({
-    cache: new QueryCache(),
+    client,
     queryHash,
     queryKey,
   })

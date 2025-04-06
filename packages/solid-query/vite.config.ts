@@ -1,9 +1,13 @@
 import { defineConfig } from 'vitest/config'
 import solid from 'vite-plugin-solid'
+
 import packageJson from './package.json'
 
 export default defineConfig({
   plugins: [solid()],
+  resolve: {
+    conditions: ['@tanstack/custom-condition'],
+  },
   test: {
     name: packageJson.name,
     dir: './src',

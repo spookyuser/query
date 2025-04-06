@@ -184,6 +184,7 @@ describe('defaultOptions', () => {
         queries: {
           queryFn: (context) => {
             expectTypeOf(context).toEqualTypeOf<{
+              client: QueryClient
               queryKey: QueryKey
               meta: Record<string, unknown> | undefined
               signal: AbortSignal
@@ -228,16 +229,11 @@ describe('fully typed usage', () => {
       TData,
       TError,
       TData,
-      QueryKey & DataTag<unknown, TData, TError>
+      DataTag<QueryKey, TData, TError>
     > = {
       predicate(query) {
         expectTypeOf(query).toEqualTypeOf<
-          Query<
-            TData,
-            TError,
-            TData,
-            QueryKey & DataTag<unknown, TData, TError>
-          >
+          Query<TData, TError, TData, DataTag<QueryKey, TData, TError>>
         >()
         expectTypeOf(query.state.data).toEqualTypeOf<TData | undefined>()
         expectTypeOf(query.state.error).toEqualTypeOf<TError | null>()
@@ -499,5 +495,115 @@ describe('fully typed usage', () => {
     queryClient.prefetchInfiniteQuery(fetchInfiniteQueryOptions)
     queryClient.setQueryDefaults(queryKey, {} as any)
     queryClient.getMutationDefaults(mutationKey)
+  })
+})
+
+describe('invalidateQueries', () => {
+  it('shows type error when queryKey is a wrong type in invalidateQueries', () => {
+    const queryClient = new QueryClient()
+
+    queryClient.invalidateQueries()
+
+    queryClient.invalidateQueries({
+      queryKey: ['1'],
+    })
+
+    queryClient.invalidateQueries({
+      // @ts-expect-error
+      queryKey: '1',
+    })
+
+    queryClient.invalidateQueries({
+      // @ts-expect-error
+      queryKey: {},
+    })
+  })
+  it('needs queryKey to be an array (#8684)', () => {
+    new QueryClient().invalidateQueries({
+      // @ts-expect-error key is not an array
+      queryKey: { foo: true },
+    })
+  })
+  it('predicate should be typed if key is tagged', () => {
+    const queryKey = ['key'] as DataTag<Array<string>, number>
+    const queryClient = new QueryClient()
+    queryClient.invalidateQueries({
+      queryKey,
+      predicate: (query) => {
+        expectTypeOf(query.state.data).toEqualTypeOf<number | undefined>()
+        expectTypeOf(query.queryKey).toEqualTypeOf<
+          DataTag<Array<string>, number>
+        >()
+        return true
+      },
+    })
+  })
+})
+
+describe('cancelQueries', () => {
+  it('predicate should be typed if key is tagged', () => {
+    const queryKey = ['key'] as DataTag<Array<string>, number>
+    const queryClient = new QueryClient()
+    queryClient.cancelQueries({
+      queryKey,
+      predicate: (query) => {
+        expectTypeOf(query.state.data).toEqualTypeOf<number | undefined>()
+        expectTypeOf(query.queryKey).toEqualTypeOf<
+          DataTag<Array<string>, number>
+        >()
+        return true
+      },
+    })
+  })
+})
+
+describe('removeQueries', () => {
+  it('predicate should be typed if key is tagged', () => {
+    const queryKey = ['key'] as DataTag<Array<string>, number>
+    const queryClient = new QueryClient()
+    queryClient.removeQueries({
+      queryKey,
+      predicate: (query) => {
+        expectTypeOf(query.state.data).toEqualTypeOf<number | undefined>()
+        expectTypeOf(query.queryKey).toEqualTypeOf<
+          DataTag<Array<string>, number>
+        >()
+        return true
+      },
+    })
+  })
+})
+
+describe('refetchQueries', () => {
+  it('predicate should be typed if key is tagged', () => {
+    const queryKey = ['key'] as DataTag<Array<string>, number>
+    const queryClient = new QueryClient()
+    queryClient.refetchQueries({
+      queryKey,
+      predicate: (query) => {
+        expectTypeOf(query.state.data).toEqualTypeOf<number | undefined>()
+        expectTypeOf(query.queryKey).toEqualTypeOf<
+          DataTag<Array<string>, number>
+        >()
+        return true
+      },
+    })
+  })
+})
+
+describe('resetQueries', () => {
+  it('predicate should be typed if key is tagged', () => {
+    const queryKey = ['key'] as DataTag<Array<string>, number>
+    const queryClient = new QueryClient()
+    queryClient.resetQueries({
+      queryKey,
+      predicate: (query) => {
+        expectTypeOf(query.state.data).toEqualTypeOf<number | undefined>()
+        expectTypeOf(query.queryKey).toEqualTypeOf<
+          DataTag<Array<string>, number>
+        >()
+        return true
+      },
+    })
   })
 })

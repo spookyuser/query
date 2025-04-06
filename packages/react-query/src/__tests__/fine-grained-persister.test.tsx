@@ -23,9 +23,11 @@ describe('fine grained persister', () => {
       getItem: (itemKey: string) => Promise.resolve(mapStorage.get(itemKey)),
       setItem: (itemKey: string, value: unknown) => {
         mapStorage.set(itemKey, value)
+        return Promise.resolve()
       },
       removeItem: (itemKey: string) => {
         mapStorage.delete(itemKey)
+        return Promise.resolve()
       },
     }
 
@@ -77,9 +79,11 @@ describe('fine grained persister', () => {
       getItem: (itemKey: string) => Promise.resolve(mapStorage.get(itemKey)),
       setItem: (itemKey: string, value: unknown) => {
         mapStorage.set(itemKey, value)
+        return Promise.resolve()
       },
       removeItem: (itemKey: string) => {
         mapStorage.delete(itemKey)
+        return Promise.resolve()
       },
     }
 
@@ -127,9 +131,11 @@ describe('fine grained persister', () => {
       getItem: (itemKey: string) => Promise.resolve(mapStorage.get(itemKey)),
       setItem: (itemKey: string, value: unknown) => {
         mapStorage.set(itemKey, value)
+        return Promise.resolve()
       },
       removeItem: (itemKey: string) => {
         mapStorage.delete(itemKey)
+        return Promise.resolve()
       },
     }
 

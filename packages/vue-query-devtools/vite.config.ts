@@ -4,6 +4,9 @@ import { tanstackViteConfig } from '@tanstack/config/vite'
 
 const config = defineConfig({
   plugins: [vue()],
+  resolve: {
+    conditions: ['@tanstack/custom-condition'],
+  },
 })
 
 export default mergeConfig(

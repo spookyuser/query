@@ -1,8 +1,12 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import { tanstackViteConfig } from '@tanstack/config/vite'
+
 import packageJson from './package.json'
 
 const config = defineConfig({
+  resolve: {
+    conditions: ['@tanstack/custom-condition'],
+  },
   test: {
     name: packageJson.name,
     dir: './src',
